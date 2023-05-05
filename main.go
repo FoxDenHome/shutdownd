@@ -1,54 +1,67 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"fmt"
 	"os"
-	"os/exec"
+	"strings"
+
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/debug"
+	"golang.org/x/sys/windows/svc/eventlog"
 )
 
-var validUsername = os.Getenv("SHUTDOWND_USERNAME")
-var validPassword = os.Getenv("SHUTDOWND_PASSWORD")
+const serviceName = "shutdownd"
 
-func httpHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(405)
-		w.Write([]byte("POST only"))
-		return
-	}
-
-	user, pw, ok := r.BasicAuth()
-	if !ok || user != validUsername || pw != validPassword {
-		w.Header().Add("WWW-Authenticate", "Basic realm=shutdownd")
-		w.WriteHeader(401)
-		w.Write([]byte("Please authenticate"))
-		return
-	}
-
-	switch r.URL.Path {
-	case "/shutdown":
-		log.Printf("Shutdown initiated")
-		err := exec.Command("shutdown", "-s", "-f", "-t", "60").Run()
-		if err != nil {
-			log.Printf("Shutdown error: %v", err)
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-			return
-		}
-	default:
-		w.WriteHeader(404)
-		w.Write([]byte("Path not mapped"))
-		return
-	}
-
-	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+func usage() {
+	fmt.Fprintf(os.Stderr, "Must be run with a sub-command from: install, uninstall, run")
 }
 
 func main() {
-	if validUsername == "" || validPassword == "" {
-		panic("Must set SHUTDOWND_USERNAME and SHUTDOWND_PASSWORD")
+	inService, err := svc.IsWindowsService()
+	if err != nil {
+		panic(err)
 	}
-	log.Printf("ShutdownD listening")
-	http.ListenAndServe(":6666", http.HandlerFunc(httpHandler))
+
+	runner := &shutdownHandler{}
+
+	if inService {
+		logger, err := eventlog.Open(serviceName)
+		if err != nil {
+			panic(err)
+		}
+		runner.logger = logger
+		err = svc.Run(serviceName, runner)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	if len(os.Args) < 2 {
+		usage()
+		return
+	}
+
+	switch strings.ToLower(os.Args[1]) {
+	case "run":
+		runner.logger = debug.New(serviceName)
+		err = debug.Run(serviceName, runner)
+		if err != nil {
+			panic(err)
+		}
+	case "install":
+		err := installService(serviceName, "ShutdownD")
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "Service installed")
+		}
+	case "uninstall":
+		err := uninstallService(serviceName)
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Fprintf(os.Stderr, "Service uninstalled")
+		}
+	}
 }
