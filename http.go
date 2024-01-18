@@ -6,15 +6,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/debug"
 )
 
-type shutdownHandler struct {
-	logger   debug.Log
-	Username string `json:"username"`
-	Password string `json:"password"`
+type Logger interface {
+	Info(eventID uint32, msg string) error
+	Error(eventID uint32, msg string) error
+	Close() error
 }
 
 func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,13 +58,10 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
+func (h *shutdownHandler) execute(args []string) (ssec bool, errno uint32) {
 	defer h.logger.Close()
 
-	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
-	changes <- svc.Status{State: svc.StartPending}
-
-	cfilePath, err := getConfigPath()
+	cfilePath, err := getConfigDir()
 	if err != nil {
 		h.logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
 		return
@@ -91,25 +85,13 @@ func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, cha
 		return
 	}
 
-	server := http.Server{
+	server := &http.Server{
 		Addr:    ":6666",
 		Handler: h,
 	}
 
-	go func() {
-		for {
-			c := <-r
-			switch c.Cmd {
-			case svc.Interrogate:
-				changes <- c.CurrentStatus
-			case svc.Stop, svc.Shutdown:
-				server.Close()
-				return
-			}
-		}
-	}()
+	h.onReady(server)
 
-	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 	h.logger.Info(1, "ShutdownD listening")
 
 	err = server.ListenAndServe()
