@@ -5,9 +5,7 @@ package main
 import "net/http"
 
 type shutdownHandler struct {
-	logger   Logger
-	Username string `json:"username"`
-	Password string `json:"password"`
+	logger Logger
 }
 
 func (h *shutdownHandler) onReady(*http.Server) {

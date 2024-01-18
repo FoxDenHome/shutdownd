@@ -1,3 +1,5 @@
 *.exe
 *.json
 *.exe~
+*.pem
+/shutdownd

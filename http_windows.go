@@ -9,11 +9,9 @@ import (
 )
 
 type shutdownHandler struct {
-	logger   Logger
-	r        <-chan svc.ChangeRequest
-	changes  chan<- svc.Status
-	Username string `json:"username"`
-	Password string `json:"password"`
+	logger  Logger
+	r       <-chan svc.ChangeRequest
+	changes chan<- svc.Status
 }
 
 const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
