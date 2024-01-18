@@ -119,7 +119,6 @@ func (h *shutdownHandler) execute(args []string) (ssec bool, errno uint32) {
 		pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
 		_ = out.Close()
 		h.logger.Info(1, "Successfully generated new certificate")
-		return
 	}
 
 	caCert, err := os.ReadFile("server.pem")
