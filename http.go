@@ -67,13 +67,13 @@ func fileExists(file string) bool {
 func (h *shutdownHandler) execute(args []string) (ssec bool, errno uint32) {
 	defer h.logger.Close()
 
-	cfilePath, err := getConfigDir()
+	configDir, err := getConfigDir(h.logger)
 	if err != nil {
 		h.logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
 		return
 	}
 
-	certFile := path.Join(cfilePath, "cert.pem")
+	certFile := path.Join(configDir, "cert.pem")
 	if !fileExists(certFile) {
 		h.logger.Info(1, "Generating new certificate")
 		// Generate new certificate
@@ -121,7 +121,7 @@ func (h *shutdownHandler) execute(args []string) (ssec bool, errno uint32) {
 		h.logger.Info(1, "Successfully generated new certificate")
 	}
 
-	caCert, err := os.ReadFile("server.pem")
+	caCert, err := os.ReadFile(path.Join(configDir, "server.pem"))
 	if err != nil {
 		h.logger.Error(1, fmt.Sprintf("Could not read server.pem: %v", err))
 		return

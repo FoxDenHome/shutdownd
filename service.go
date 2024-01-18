@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+var configDir = ""
+
 func exePath() (string, error) {
 	prog := os.Args[0]
 	p, err := filepath.Abs(prog)
@@ -35,10 +37,16 @@ func exePath() (string, error) {
 	return "", err
 }
 
-func getConfigDir() (string, error) {
-	exepath, err := exePath()
+func getConfigDir(logger Logger) (string, error) {
+	if configDir != "" {
+		return configDir, nil
+	}
+
+	exePath, err := exePath()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Dir(exepath), nil
+	configDir = filepath.Dir(exePath)
+	logger.Info(1, fmt.Sprintf("Config dir %s from EXE path %s", configDir, exePath))
+	return configDir, err
 }
