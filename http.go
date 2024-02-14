@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+const SHUTDOWN_BINARY = "C:\\Windows\\System32\\shutdown.exe"
+
 type Logger interface {
 	Info(eventID uint32, msg string) error
 	Error(eventID uint32, msg string) error
@@ -33,7 +35,7 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/shutdown":
 		h.logger.Info(1, "Shutdown initiated")
-		err := exec.Command("shutdown", "-s", "-f", "-t", "60").Run()
+		err := exec.Command(SHUTDOWN_BINARY, "-s", "-f", "-t", "60").Run()
 		if err != nil {
 			h.logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
 			w.WriteHeader(500)
@@ -42,7 +44,7 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/abort":
 		h.logger.Info(1, "Shutdown aborted")
-		err := exec.Command("shutdown", "-a").Run()
+		err := exec.Command(SHUTDOWN_BINARY, "-a").Run()
 		if err != nil {
 			h.logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
 			w.WriteHeader(500)
