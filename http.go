@@ -12,12 +12,9 @@ import (
 	"math/big"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"time"
 )
-
-const SHUTDOWN_BINARY = "C:\\Windows\\System32\\shutdown.exe"
 
 type Logger interface {
 	Info(eventID uint32, msg string) error
@@ -35,7 +32,7 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/shutdown":
 		h.logger.Info(1, "Shutdown initiated")
-		err := exec.Command(SHUTDOWN_BINARY, "-s", "-f", "-t", "60").Run()
+		err := h.doShutdown()
 		if err != nil {
 			h.logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
 			w.WriteHeader(500)
@@ -44,7 +41,7 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/abort":
 		h.logger.Info(1, "Shutdown aborted")
-		err := exec.Command(SHUTDOWN_BINARY, "-a").Run()
+		err := h.doShutdownAbort()
 		if err != nil {
 			h.logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
 			w.WriteHeader(500)

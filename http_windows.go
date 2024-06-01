@@ -4,9 +4,12 @@ package main
 
 import (
 	"net/http"
+	"os/exec"
 
 	"golang.org/x/sys/windows/svc"
 )
+
+const shutdown_binary = "C:\\Windows\\System32\\shutdown.exe"
 
 type shutdownHandler struct {
 	logger  Logger
@@ -15,6 +18,14 @@ type shutdownHandler struct {
 }
 
 const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
+
+func (h *shutdownHandler) doShutdown() error {
+	return exec.Command(shutdown_binary, "-s", "-f", "-t", "60").Run()
+}
+
+func (h *shutdownHandler) doShutdownAbort() error {
+	return exec.Command(shutdown_binary, "-a").Run()
+}
 
 func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	h.changes = changes
