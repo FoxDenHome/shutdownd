@@ -33,7 +33,7 @@ func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, cha
 
 	changes <- svc.Status{State: svc.StartPending}
 
-	return h.execute(args)
+	return h.execute()
 }
 
 func (h *shutdownHandler) onReady(server *http.Server) {

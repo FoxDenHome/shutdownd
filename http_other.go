@@ -12,7 +12,7 @@ type shutdownHandler struct {
 }
 
 func (h *shutdownHandler) doShutdown() error {
-	return exec.Command("shutdown", "-P", "60").Run()
+	return exec.Command("shutdown", "-P", "1").Run()
 }
 
 func (h *shutdownHandler) doShutdownAbort() error {

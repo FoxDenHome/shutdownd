@@ -63,7 +63,7 @@ func fileExists(file string) bool {
 	return err == nil
 }
 
-func (h *shutdownHandler) execute(args []string) (ssec bool, errno uint32) {
+func (h *shutdownHandler) execute() (ssec bool, errno uint32) {
 	defer h.logger.Close()
 
 	configDir, err := getConfigDir(h.logger)

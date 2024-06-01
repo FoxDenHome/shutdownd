@@ -23,5 +23,5 @@ func (*genericLogger) Info(eventID uint32, msg string) error {
 func main() {
 	runner := &shutdownHandler{}
 	runner.logger = &genericLogger{}
-	runner.execute([]string{})
+	runner.execute()
 }
