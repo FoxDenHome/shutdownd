@@ -2,6 +2,7 @@
 set -euo pipefail
 
 export COMMIT="$(git rev-parse HEAD)"
+export CGO_ENABLED=0
 
 buildbin() {
     local suffix=''
@@ -24,7 +25,6 @@ buildbin() {
 buildos() {
     export GOOS="$1"
     export GOARCH="$2"
-    export CGO_ENABLED=0
 
     buildbin certgen
     buildbin shutdownd
