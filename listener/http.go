@@ -1,19 +1,12 @@
 package listener
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/pem"
 	"fmt"
-	"math/big"
 	"net/http"
 	"os"
 	"path"
-	"time"
 
 	"github.com/FoxDenHome/shutdownd/util"
 )
@@ -73,56 +66,11 @@ func (h *Listener) execute() (ssec bool, errno uint32) {
 	certFile := path.Join(configDir, "cert.pem")
 	if !fileExists(certFile) {
 		_ = h.Logger.Info(1, "Generating new certificate")
-		// Generate new certificate
-		hostname, err := os.Hostname()
+		err = util.GenerateSelfSignedCert(certFile, "")
 		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Could not get hostname: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Could not generate new certificate: %v", err))
 			return
 		}
-		priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Could not generate private key: %v", err))
-			return
-		}
-		template := x509.Certificate{
-			SerialNumber: big.NewInt(1),
-			Subject: pkix.Name{
-				Organization: []string{"ShutdownD"},
-				CommonName:   hostname,
-			},
-			NotBefore: time.Now().Add(-time.Hour),
-			NotAfter:  time.Now().Add(time.Hour * 24 * 365 * 10),
-
-			KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-			ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-			BasicConstraintsValid: true,
-		}
-		certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Failed to self-sign certificate: %s", err))
-			return
-		}
-		privateBytes, err := x509.MarshalECPrivateKey(priv)
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Unable to marshal private key: %v", err))
-			return
-		}
-		out, err := os.Create(certFile)
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Unable to open cert.pem for writing: %v", err))
-			return
-		}
-		err = pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Failed to PEM encode CERTIFICATE: %v", err))
-			return
-		}
-		err = pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
-		if err != nil {
-			_ = h.Logger.Error(1, fmt.Sprintf("Failed to PEM encode EC PRIVATE KEY: %v", err))
-			return
-		}
-		_ = out.Close()
 		_ = h.Logger.Info(1, "Successfully generated new certificate")
 	}
 
