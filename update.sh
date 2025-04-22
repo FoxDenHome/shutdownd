@@ -5,4 +5,4 @@ set -x
 cd "$(realpath $(dirname "${0}"))"
 git pull
 ./build.sh
-./install.sh
+sudo ./install.sh
