@@ -1,1 +1,2 @@
-shutdownd ALL=(root) NOPASSWD: /usr/bin/shutdown *
+shutdownd ALL=(root) NOPASSWD: /usr/bin/shutdown -P 1
+shutdownd ALL=(root) NOPASSWD: /usr/bin/shutdown -c
