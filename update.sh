@@ -8,6 +8,8 @@ cd /opt/shutdownd
 git pull
 ./build.sh
 
+useradd -s /bin/false shutdownd || true
+
 cp -fv shutdownd.service /etc/systemd/system/shutdownd.service
 cp -fv shutdownd.sudoers /etc/sudoers.d/shutdownd
 systemctl daemon-reload
