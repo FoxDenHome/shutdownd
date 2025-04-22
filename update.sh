@@ -4,7 +4,7 @@ set -x
 
 # This needs to run as root probably
 
-cd /opt/shutdownd
+cd "$(realpath $(dirname "${0}"))"
 git pull
 ./build.sh
 
