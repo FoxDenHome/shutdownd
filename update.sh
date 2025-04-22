@@ -2,14 +2,13 @@
 set -euo pipefail
 set -x
 
-# This needs to run as root probably
+# This needs to run as root
+useradd -s /bin/false shutdownd || true
 
 _path="$(realpath $(dirname "${0}"))"
 cd "$_path"
 git pull
 ./build.sh
-
-useradd -s /bin/false shutdownd || true
 
 cat shutdownd.service | sed "s~__PATH__~$_path~g" > /etc/systemd/system/shutdownd.service
 cp -fv shutdownd.sudoers /etc/sudoers.d/shutdownd
