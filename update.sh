@@ -11,7 +11,7 @@ git pull
 
 useradd -s /bin/false shutdownd || true
 
-cat shutdownd.service sed "s~__PATH__~$_path~g" > /etc/systemd/system/shutdownd.service
+cat shutdownd.service | sed "s~__PATH__~$_path~g" > /etc/systemd/system/shutdownd.service
 cp -fv shutdownd.sudoers /etc/sudoers.d/shutdownd
 systemctl daemon-reload
 systemctl enable shutdownd
