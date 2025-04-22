@@ -4,13 +4,14 @@ set -x
 
 # This needs to run as root probably
 
-cd "$(realpath $(dirname "${0}"))"
+_path="$(realpath $(dirname "${0}"))"
+cd "$_path"
 git pull
 ./build.sh
 
 useradd -s /bin/false shutdownd || true
 
-cp -fv shutdownd.service /etc/systemd/system/shutdownd.service
+sed "s~__PATH__~$_path~g" shutdownd.service /etc/systemd/system/shutdownd.service
 cp -fv shutdownd.sudoers /etc/sudoers.d/shutdownd
 systemctl daemon-reload
 systemctl enable shutdownd
