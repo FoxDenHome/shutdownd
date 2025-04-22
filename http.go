@@ -129,7 +129,7 @@ func (h *shutdownHandler) execute() (ssec bool, errno uint32) {
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	server := &http.Server{
-		Addr:    ":6666",
+		Addr:    ":666",
 		Handler: h,
 		TLSConfig: &tls.Config{
 			MinVersion: tls.VersionTLS12,
