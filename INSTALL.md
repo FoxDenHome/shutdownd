@@ -28,5 +28,5 @@ git clone https://github.com/FoxDenHome/shutdownd
 - Then to initially install and also to update run
 
 ```bash
-sudo directory/of/shutdownd/update.sh
+./directory/of/shutdownd/update.sh
 ```
