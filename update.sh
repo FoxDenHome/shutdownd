@@ -2,8 +2,7 @@
 set -euo pipefail
 set -x
 
-_path="$(realpath $(dirname "${0}"))"
-cd "$_path"
+cd "$(realpath $(dirname "${0}"))"
 git pull
 ./build.sh
 ./install.sh
