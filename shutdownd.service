@@ -1,0 +1,13 @@
+[Unit]
+Description=ShutdownD
+StartLimitIntervalSec=0
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/opt/shutdownd/shutdownd
+
+[Install]
+WantedBy=multi-user.target
