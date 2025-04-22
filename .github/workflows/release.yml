@@ -32,7 +32,6 @@ jobs:
           if-no-files-found: error
       - name: Release mainline
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
         with:
           tag_name: latest
           files: dist/*
@@ -40,7 +39,6 @@ jobs:
           prerelease: false
       - name: Tag Repo
         uses: richardsimko/update-tag@v1
-        if: github.ref == 'refs/heads/main'
         with:
           tag_name: latest
         env:
