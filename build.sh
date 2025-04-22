@@ -10,7 +10,7 @@ buildbin() {
         "./cmd/$1"
 }
 
-rm -rf dist && mkdir -p dist
+rm -fv shutdownd certgen
 
 buildbin shutdownd
 buildbin certgen
