@@ -3,7 +3,7 @@ Description=ShutdownD
 StartLimitIntervalSec=0
 
 [Service]
-User=root
+User=shutdownd
 Type=simple
 Restart=always
 RestartSec=1
