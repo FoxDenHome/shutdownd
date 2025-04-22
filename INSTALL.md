@@ -29,6 +29,5 @@ sudo git clone https://github.com/FoxDenHome/shutdownd /opt/shutdownd
 - Then to initially install and also to update run
 
 ```bash
-cd /opt/shutdownd
-sudo ./update.sh
+sudo /opt/shutdownd/update.sh
 ```
