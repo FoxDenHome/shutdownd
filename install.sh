@@ -5,7 +5,11 @@ set -x
 _path="$(realpath $(dirname "${0}"))"
 cd "$_path"
 
-cat shutdownd.service | sed "s~__PATH__~$_path~g" > /etc/systemd/system/shutdownd.service
+cp -fv shutdownd /usr/bin/shutdownd
+
+mkdir -p /etc/shutdownd && chown -R shutdownd:shutdownd /etc/shutdownd
+
+cp -fv shutdownd.service /etc/systemd/system/shutdownd.service
 cp -fv shutdownd.sudoers /etc/sudoers.d/shutdownd
 systemctl daemon-reload
 systemctl enable shutdownd

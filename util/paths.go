@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-var configDir = ""
+var configDir = os.Getenv("SHUTDOWND_CONFIG_DIR")
 
 func ExePath() (string, error) {
 	prog := os.Args[0]
