@@ -5,12 +5,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/FoxDenHome/shutdownd/util"
 	"golang.org/x/sys/windows/svc/eventlog"
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
 func installService(name, desc string) error {
-	exepath, err := exePath()
+	exepath, err := util.ExePath()
 	if err != nil {
 		return err
 	}

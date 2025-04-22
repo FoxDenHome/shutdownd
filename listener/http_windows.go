@@ -1,33 +1,34 @@
 //go:build windows
 
-package main
+package listener
 
 import (
 	"net/http"
 	"os/exec"
 
+	"github.com/FoxDenHome/shutdownd/util"
 	"golang.org/x/sys/windows/svc"
 )
 
 const shutdown_binary = "C:\\Windows\\System32\\shutdown.exe"
 
-type shutdownHandler struct {
-	logger  Logger
+type Listener struct {
+	Logger  util.Logger
 	r       <-chan svc.ChangeRequest
 	changes chan<- svc.Status
 }
 
 const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown
 
-func (h *shutdownHandler) doShutdown() error {
+func (h *Listener) doShutdown() error {
 	return exec.Command(shutdown_binary, "-s", "-f", "-t", "60").Run()
 }
 
-func (h *shutdownHandler) doShutdownAbort() error {
+func (h *Listener) doShutdownAbort() error {
 	return exec.Command(shutdown_binary, "-a").Run()
 }
 
-func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
+func (h *Listener) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	h.changes = changes
 	h.r = r
 
@@ -36,7 +37,7 @@ func (h *shutdownHandler) Execute(args []string, r <-chan svc.ChangeRequest, cha
 	return h.execute()
 }
 
-func (h *shutdownHandler) onReady(server *http.Server) {
+func (h *Listener) onReady(server *http.Server) {
 	go func() {
 		for {
 			c := <-h.r

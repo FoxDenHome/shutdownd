@@ -2,7 +2,11 @@
 
 package main
 
-import "log"
+import (
+	"log"
+
+	"github.com/FoxDenHome/shutdownd/listener"
+)
 
 type genericLogger struct{}
 
@@ -21,7 +25,7 @@ func (*genericLogger) Info(eventID uint32, msg string) error {
 }
 
 func main() {
-	runner := &shutdownHandler{}
-	runner.logger = &genericLogger{}
-	runner.execute()
+	runner := &listener.Listener{}
+	runner.Logger = &genericLogger{}
+	runner.Execute()
 }

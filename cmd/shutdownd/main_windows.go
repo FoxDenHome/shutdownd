@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/FoxDenHome/shutdownd/listener"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
@@ -24,14 +25,14 @@ func main() {
 		panic(err)
 	}
 
-	runner := &shutdownHandler{}
+	runner := &listener.Listener{}
 
 	if inService {
 		logger, err := eventlog.Open(serviceName)
 		if err != nil {
 			panic(err)
 		}
-		runner.logger = logger
+		runner.Logger = logger
 		err = svc.Run(serviceName, runner)
 		if err != nil {
 			panic(err)
@@ -46,7 +47,7 @@ func main() {
 
 	switch strings.ToLower(os.Args[1]) {
 	case "run":
-		runner.logger = debug.New(serviceName)
+		runner.Logger = debug.New(serviceName)
 		err = debug.Run(serviceName, runner)
 		if err != nil {
 			panic(err)

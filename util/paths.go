@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 var configDir = ""
 
-func exePath() (string, error) {
+func ExePath() (string, error) {
 	prog := os.Args[0]
 	p, err := filepath.Abs(prog)
 	if err != nil {
@@ -37,12 +37,12 @@ func exePath() (string, error) {
 	return "", err
 }
 
-func getConfigDir(logger Logger) (string, error) {
+func GetConfigDir(logger Logger) (string, error) {
 	if configDir != "" {
 		return configDir, nil
 	}
 
-	exePath, err := exePath()
+	exePath, err := ExePath()
 	if err != nil {
 		return "", err
 	}

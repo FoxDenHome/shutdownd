@@ -1,4 +1,4 @@
-package main
+package listener
 
 import (
 	"crypto/ecdsa"
@@ -14,15 +14,11 @@ import (
 	"os"
 	"path"
 	"time"
+
+	"github.com/FoxDenHome/shutdownd/util"
 )
 
-type Logger interface {
-	Info(eventID uint32, msg string) error
-	Error(eventID uint32, msg string) error
-	Close() error
-}
-
-func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(405)
 		w.Write([]byte("POST only"))
@@ -31,19 +27,19 @@ func (h *shutdownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/shutdown":
-		h.logger.Info(1, "Shutdown initiated")
+		h.Logger.Info(1, "Shutdown initiated")
 		err := h.doShutdown()
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
 			return
 		}
 	case "/abort":
-		h.logger.Info(1, "Shutdown aborted")
+		h.Logger.Info(1, "Shutdown aborted")
 		err := h.doShutdownAbort()
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
 			return
@@ -63,27 +59,27 @@ func fileExists(file string) bool {
 	return err == nil
 }
 
-func (h *shutdownHandler) execute() (ssec bool, errno uint32) {
-	defer h.logger.Close()
+func (h *Listener) execute() (ssec bool, errno uint32) {
+	defer h.Logger.Close()
 
-	configDir, err := getConfigDir(h.logger)
+	configDir, err := util.GetConfigDir(h.Logger)
 	if err != nil {
-		h.logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
+		h.Logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
 		return
 	}
 
 	certFile := path.Join(configDir, "cert.pem")
 	if !fileExists(certFile) {
-		h.logger.Info(1, "Generating new certificate")
+		h.Logger.Info(1, "Generating new certificate")
 		// Generate new certificate
 		hostname, err := os.Hostname()
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Could not get hostname: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Could not get hostname: %v", err))
 			return
 		}
 		priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Could not generate private key: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Could not generate private key: %v", err))
 			return
 		}
 		template := x509.Certificate{
@@ -101,28 +97,28 @@ func (h *shutdownHandler) execute() (ssec bool, errno uint32) {
 		}
 		certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Failed to self-sign certificate: %s", err))
+			h.Logger.Error(1, fmt.Sprintf("Failed to self-sign certificate: %s", err))
 			return
 		}
 		privateBytes, err := x509.MarshalECPrivateKey(priv)
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Unable to marshal private key: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Unable to marshal private key: %v", err))
 			return
 		}
 		out, err := os.Create(certFile)
 		if err != nil {
-			h.logger.Error(1, fmt.Sprintf("Unable to open cert.pem for writing: %v", err))
+			h.Logger.Error(1, fmt.Sprintf("Unable to open cert.pem for writing: %v", err))
 			return
 		}
 		pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
 		pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
 		_ = out.Close()
-		h.logger.Info(1, "Successfully generated new certificate")
+		h.Logger.Info(1, "Successfully generated new certificate")
 	}
 
 	caCert, err := os.ReadFile(path.Join(configDir, "server.pem"))
 	if err != nil {
-		h.logger.Error(1, fmt.Sprintf("Could not read server.pem: %v", err))
+		h.Logger.Error(1, fmt.Sprintf("Could not read server.pem: %v", err))
 		return
 	}
 	caCertPool := x509.NewCertPool()
@@ -140,11 +136,11 @@ func (h *shutdownHandler) execute() (ssec bool, errno uint32) {
 
 	h.onReady(server)
 
-	h.logger.Info(1, "ShutdownD listening")
+	h.Logger.Info(1, "ShutdownD listening")
 
 	err = server.ListenAndServeTLS(certFile, certFile)
 	if err != nil {
-		h.logger.Error(1, fmt.Sprintf("Could not listen on HTTP: %v", err))
+		h.Logger.Error(1, fmt.Sprintf("Could not listen on HTTP: %v", err))
 		return
 	}
 	return
