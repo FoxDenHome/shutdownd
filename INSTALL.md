@@ -20,7 +20,7 @@ cd /D C:\shutdownd
 - Open a shell and run 
 
 ```bash
-sudo git clone https://github.com/FoxDenHome/shutdownd
+git clone https://github.com/FoxDenHome/shutdownd
 ```
 
 - Copy `server.pem` from the server to `/etc/shutdownd/server.pem`
