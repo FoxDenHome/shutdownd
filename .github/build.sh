@@ -5,21 +5,23 @@ export COMMIT="$(git rev-parse HEAD)"
 export CGO_ENABLED=0
 
 buildbin() {
+    local bin="$1"
+
     local suffix=''
     if [[ "${GOOS}" == "windows" ]]; then
         suffix='.exe'
     fi
 
     local prefix=''
-    if [[ "$1" != "shutdownd" ]]; then
+    if [[ "${bin}" != "shutdownd" ]]; then
         prefix='shutdownd-'
     fi
 
     go build \
-        -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
+        -o "dist/${prefix}${bin}-${GOOS}-${GOARCH}${suffix}" \
         -ldflags "-s -w -X github.com/FoxDenHome/shutdownd/util.commit=${COMMIT}" \
         -trimpath \
-        "./cmd/$1"
+        "./cmd/${bin}"
 }
 
 buildos() {
