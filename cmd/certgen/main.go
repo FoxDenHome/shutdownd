@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 
 	"github.com/FoxDenHome/shutdownd/util"
@@ -11,6 +12,8 @@ var hostnameFlag = flag.String("hostname", "", "Hostname to generate certificate
 var certFileFlag = flag.String("file", "", "Path to the certificate file (required)")
 
 func main() {
+	log.Printf("ShutdownD certificate generator version %s", util.Commit())
+
 	flag.Parse()
 
 	if *certFileFlag == "" {

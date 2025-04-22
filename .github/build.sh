@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-export COMMIT=$(git rev-parse --short HEAD)
+export COMMIT="$(git rev-parse HEAD)"
 
 buildbin() {
     local suffix=''
@@ -15,7 +15,7 @@ buildbin() {
     fi
 
     go build -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
-        -ldflags "-s -w -X util.commit=${COMMIT}" \
+        -ldflags "-s -w -X github.com/FoxDenHome/shutdownd/util.commit=${COMMIT}" \
         -trimpath \
         -v \
         "./cmd/$1"
