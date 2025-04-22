@@ -14,7 +14,8 @@ buildbin() {
         prefix='shutdownd-'
     fi
 
-    go build -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
+    go build \
+        -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
         -ldflags "-s -w -X github.com/FoxDenHome/shutdownd/util.commit=${COMMIT}" \
         -trimpath \
         "./cmd/$1"
