@@ -3,31 +3,21 @@ set -euo pipefail
 
 export COMMIT=$(git rev-parse --short HEAD)
 
-buildbin() {
-    local suffix=''
-    if [[ "${GOOS}" == "windows" ]]; then
-        suffix='.exe'
-    fi
-
-    local prefix=''
-    if [[ "$1" != "shutdownd" ]]; then
-        prefix='shutdown-'
-    fi
-
-    go build -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
-        -ldflags "-s -w -X util.commit=${COMMIT}" \
-        -trimpath \
-        -v \
-        "./cmd/$1"
-}
-
 buildos() {
     export GOOS="$1"
     export GOARCH="$2"
     export CGO_ENABLED=0
 
-    buildbin certgen
-    buildbin shutdownd
+    local suffix=''
+    if [[ "${GOOS}" == "windows" ]]; then
+        suffix='.exe'
+    fi
+
+    go build -o "dist/shutdownd-${GOOS}-${GOARCH}${suffix}" \
+        -ldflags "-s -w -X util.commit=${COMMIT}" \
+        -trimpath \
+        -v \
+        "./cmd/shutdownd"
 }
 
 rm -rf dist
