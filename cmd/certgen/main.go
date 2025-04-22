@@ -11,9 +11,13 @@ import (
 	"math/big"
 	"os"
 	"time"
+
+	"github.com/FoxDenHome/shutdownd/util"
 )
 
 func main() {
+	log.Printf("ShutdownD certgen version %s", util.Commit())
+
 	certFile := "server.pem"
 
 	log.Print("Generating new certificate")

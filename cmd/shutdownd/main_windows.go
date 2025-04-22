@@ -4,10 +4,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/FoxDenHome/shutdownd/listener"
+	"github.com/FoxDenHome/shutdownd/util"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
@@ -20,6 +22,8 @@ func usage() {
 }
 
 func main() {
+	log.Printf("ShutdownD version %s", util.Commit())
+
 	inService, err := svc.IsWindowsService()
 	if err != nil {
 		panic(err)

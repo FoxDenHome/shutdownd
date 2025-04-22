@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/FoxDenHome/shutdownd/listener"
+	"github.com/FoxDenHome/shutdownd/util"
 )
 
 type genericLogger struct{}
@@ -25,6 +26,8 @@ func (*genericLogger) Info(eventID uint32, msg string) error {
 }
 
 func main() {
+	log.Printf("ShutdownD version %s", util.Commit())
+
 	runner := &listener.Listener{}
 	runner.Logger = &genericLogger{}
 	runner.Execute()
