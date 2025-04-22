@@ -17,7 +17,6 @@ buildbin() {
     go build -o "dist/$prefix$1-${GOOS}-${GOARCH}${suffix}" \
         -ldflags "-s -w -X github.com/FoxDenHome/shutdownd/util.commit=${COMMIT}" \
         -trimpath \
-        -v \
         "./cmd/$1"
 }
 
