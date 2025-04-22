@@ -20,14 +20,13 @@ cd /D C:\shutdownd
 - Open a shell and run 
 
 ```bash
-sudo useradd -s /bin/false shutdownd
-sudo git clone https://github.com/FoxDenHome/shutdownd /opt/shutdownd
+sudo git clone https://github.com/FoxDenHome/shutdownd
 ```
 
-- Copy `server.pem` from the server to `/opt/shutdownd/server.pem`
+- Copy `server.pem` from the server to `/etc/shutdownd/server.pem`
 
 - Then to initially install and also to update run
 
 ```bash
-sudo /opt/shutdownd/update.sh
+sudo directory/of/shutdownd/update.sh
 ```
