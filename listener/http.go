@@ -21,37 +21,37 @@ import (
 func (h *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(405)
-		w.Write([]byte("POST only"))
+		_, _ = w.Write([]byte("POST only"))
 		return
 	}
 
 	switch r.URL.Path {
 	case "/shutdown":
-		h.Logger.Info(1, "Shutdown initiated")
+		_ = h.Logger.Info(1, "Shutdown initiated")
 		err := h.doShutdown()
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Shutdown start error: %v", err))
 			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
+			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
 	case "/abort":
-		h.Logger.Info(1, "Shutdown aborted")
+		_ = h.Logger.Info(1, "Shutdown aborted")
 		err := h.doShutdownAbort()
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Shutdown abort error: %v", err))
 			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
+			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
 	default:
 		w.WriteHeader(404)
-		w.Write([]byte("Path not mapped"))
+		_, _ = w.Write([]byte("Path not mapped"))
 		return
 	}
 
 	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 func fileExists(file string) bool {
@@ -60,26 +60,28 @@ func fileExists(file string) bool {
 }
 
 func (h *Listener) execute() (ssec bool, errno uint32) {
-	defer h.Logger.Close()
+	defer func() {
+		_ = h.Logger.Close()
+	}()
 
 	configDir, err := util.GetConfigDir(h.Logger)
 	if err != nil {
-		h.Logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
+		_ = h.Logger.Error(1, fmt.Sprintf("Could not locate config.json: %v", err))
 		return
 	}
 
 	certFile := path.Join(configDir, "cert.pem")
 	if !fileExists(certFile) {
-		h.Logger.Info(1, "Generating new certificate")
+		_ = h.Logger.Info(1, "Generating new certificate")
 		// Generate new certificate
 		hostname, err := os.Hostname()
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Could not get hostname: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Could not get hostname: %v", err))
 			return
 		}
 		priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Could not generate private key: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Could not generate private key: %v", err))
 			return
 		}
 		template := x509.Certificate{
@@ -97,28 +99,36 @@ func (h *Listener) execute() (ssec bool, errno uint32) {
 		}
 		certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Failed to self-sign certificate: %s", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Failed to self-sign certificate: %s", err))
 			return
 		}
 		privateBytes, err := x509.MarshalECPrivateKey(priv)
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Unable to marshal private key: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Unable to marshal private key: %v", err))
 			return
 		}
 		out, err := os.Create(certFile)
 		if err != nil {
-			h.Logger.Error(1, fmt.Sprintf("Unable to open cert.pem for writing: %v", err))
+			_ = h.Logger.Error(1, fmt.Sprintf("Unable to open cert.pem for writing: %v", err))
 			return
 		}
-		pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
-		pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
+		err = pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
+		if err != nil {
+			_ = h.Logger.Error(1, fmt.Sprintf("Failed to PEM encode CERTIFICATE: %v", err))
+			return
+		}
+		err = pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
+		if err != nil {
+			_ = h.Logger.Error(1, fmt.Sprintf("Failed to PEM encode EC PRIVATE KEY: %v", err))
+			return
+		}
 		_ = out.Close()
-		h.Logger.Info(1, "Successfully generated new certificate")
+		_ = h.Logger.Info(1, "Successfully generated new certificate")
 	}
 
 	caCert, err := os.ReadFile(path.Join(configDir, "server.pem"))
 	if err != nil {
-		h.Logger.Error(1, fmt.Sprintf("Could not read server.pem: %v", err))
+		_ = h.Logger.Error(1, fmt.Sprintf("Could not read server.pem: %v", err))
 		return
 	}
 	caCertPool := x509.NewCertPool()
@@ -136,11 +146,11 @@ func (h *Listener) execute() (ssec bool, errno uint32) {
 
 	h.onReady(server)
 
-	h.Logger.Info(1, "ShutdownD listening")
+	_ = h.Logger.Info(1, "ShutdownD listening")
 
 	err = server.ListenAndServeTLS(certFile, certFile)
 	if err != nil {
-		h.Logger.Error(1, fmt.Sprintf("Could not listen on HTTP: %v", err))
+		_ = h.Logger.Error(1, fmt.Sprintf("Could not listen on HTTP: %v", err))
 		return
 	}
 	return

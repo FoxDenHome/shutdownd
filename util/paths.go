@@ -47,6 +47,6 @@ func GetConfigDir(logger Logger) (string, error) {
 		return "", err
 	}
 	configDir = filepath.Dir(exePath)
-	logger.Info(1, fmt.Sprintf("Config dir %s from EXE path %s", configDir, exePath))
+	_ = logger.Info(1, fmt.Sprintf("Config dir %s from EXE path %s", configDir, exePath))
 	return configDir, err
 }

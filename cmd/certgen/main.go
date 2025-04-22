@@ -55,7 +55,18 @@ func main() {
 		log.Printf("Unable to open cert.pem for writing: %v", err)
 		return
 	}
-	pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
-	pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
-	_ = out.Close()
+	defer func() {
+		_ = out.Close()
+	}()
+
+	err = pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
+	if err != nil {
+		log.Printf("Failed to PEM encode CERTIFICATE: %v", err)
+		return
+	}
+	err = pem.Encode(out, &pem.Block{Type: "EC PRIVATE KEY", Bytes: privateBytes})
+	if err != nil {
+		log.Printf("Failed to PEM encode EC PRIVATE KEY: %v", err)
+		return
+	}
 }
