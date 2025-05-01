@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+set -x
 
 export COMMIT="$(git rev-parse HEAD)"
 
