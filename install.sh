@@ -2,6 +2,8 @@
 set -euo pipefail
 set -x
 
+id shutdownd >/dev/null || useradd -r -d /var/empty -s /usr/sbin/nologin shutdownd
+
 _path="$(realpath $(dirname "${0}"))"
 cd "$_path"
 
