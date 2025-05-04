@@ -25,7 +25,7 @@ jobs:
       - name: Download Go modules
         run: go mod download
       - name: Lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
       - name: Build
         run: ./.github/build.sh
       - name: Test
