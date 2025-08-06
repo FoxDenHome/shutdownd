@@ -1,5 +1,5 @@
 [Unit]
-Description=ShutdownD
+Description=shutdownd
 StartLimitIntervalSec=0
 
 [Service]
