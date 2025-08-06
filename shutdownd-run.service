@@ -1,0 +1,9 @@
+[Unit]
+Description=shutdownd runner
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/shutdown -P 1
+ExecStop=/usr/bin/shutdown -c
