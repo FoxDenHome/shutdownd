@@ -2,6 +2,6 @@ module github.com/FoxDenHome/shutdownd
 
 go 1.23.0
 
-toolchain go1.24.6
+toolchain go1.25.0
 
 require golang.org/x/sys v0.35.0
