@@ -42,7 +42,7 @@ jobs:
           fail_on_unmatched_files: true
           prerelease: false
       - name: Tag Repo
-        uses: richardsimko/update-tag@v1
+        uses: richardsimko/update-tag@v2
         with:
           tag_name: latest
         env:
